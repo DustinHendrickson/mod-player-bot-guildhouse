@@ -1,0 +1,10 @@
+[worldserver]
+
+##############################################
+# mod-player-bot-guildhouse configuration
+##############################################
+#
+#    PlayerbotGuildhouse.MoveBotsToGuildhouseCheckFrequency
+#        Description: The frequency (in seconds) at which the check to move safe guildbots is performed.
+#        Default:     60
+PlayerbotGuildhouse.MoveBotsToGuildhouseCheckFrequency = 60
