@@ -3,7 +3,7 @@
  *
  * This module teleports all online guild bots to the guild house (GM Island)
  * when a real (human) player logs in, enters zone 876, or when a timer periodically
- * checks for real players in zone 876 .
+ * checks for real players in zone 876.
  */
 
 #include "ScriptMgr.h"
@@ -31,7 +31,8 @@ static bool IsPlayerBot(Player* player)
 }
 
 // Safety check: Returns true if the bot is in a safe state for teleporting to the guild house.
-static bool IsBotSafeForGuildHouse(Player* bot)
+// Modified to allow moving the bot if the only non-bot in its group is the triggering real player.
+static bool IsBotSafeForGuildHouse(Player* bot, Player* triggerPlayer)
 {
     if (!bot)
     {
@@ -62,7 +63,8 @@ static bool IsBotSafeForGuildHouse(Player* bot)
         for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
         {
             Player* member = ref->GetSource();
-            if (member && !IsPlayerBot(member))
+            // If the group member is a real player and is not the triggering player, do not move the bot.
+            if (member && !IsPlayerBot(member) && member != triggerPlayer)
             {
                 return false;
             }
@@ -113,8 +115,8 @@ static void TryToSummonGuildBotsToGuildhouseForRealPlayer(Player* realPlayer)
         // If the target is in the same guild and is identified as a bot...
         if (target && target->GetGuildId() == realPlayer->GetGuildId() && IsPlayerBot(target))
         {
-            // ...and if the bot is safe for teleport, then update it.
-            if (!IsBotSafeForGuildHouse(target))
+            // ...and if the bot is safe for teleport (allowing exception for the triggering player), then update it.
+            if (!IsBotSafeForGuildHouse(target, realPlayer))
             {
                 continue;
             }
@@ -165,7 +167,7 @@ public:
     void OnUpdate(uint32 diff) override
     {
         m_timer += diff;
-        // Run the check every 30 seconds.
+        // Run the check every configured interval.
         if (m_timer < (g_MoveBotsToGuildhouseCheckFrequency * 1000))
         {
             return;
