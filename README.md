@@ -1,4 +1,3 @@
-```
 # AzerothCore Module: PlayerBot Guild House Integration
 
 > **Disclaimer:** This module requires both the [Playerbots module](https://github.com/liyunfan1223/mod-playerbots) and the [Guild House module](https://github.com/azerothcore/mod-guildhouse). Ensure both are installed and loaded before enabling this integration.
@@ -115,4 +114,3 @@ This module is released under the GNU GPL v2 license, matching AzerothCore’s l
 ## Contribution
 
 Created and maintained by Dustin Hendrickson. Pull requests and issues are welcome. Please adhere to AzerothCore coding standards.
-```
