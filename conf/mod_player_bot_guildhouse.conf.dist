@@ -3,8 +3,50 @@
 ##############################################
 # mod-player-bot-guildhouse configuration
 ##############################################
-#
-#    PlayerbotGuildhouse.MoveBotsToGuildhouseCheckFrequency
-#        Description: The frequency (in seconds) at which the check to move safe guildbots is performed.
+
+#    PlayerbotGuildhouse.TeleportCycleFrequency
+#        Description: How often (in seconds) the teleportation
+#                     cycle runs to evaluate entry and exit.
+#        Default:     120
+PlayerbotGuildhouse.TeleportCycleFrequency = 120
+
+#    PlayerbotGuildhouse.StaggeredTeleport.BatchSize
+#        Description: Maximum number of bots to teleport in
+#                     or out each cycle.
+#        Default:     5
+PlayerbotGuildhouse.StaggeredTeleport.BatchSize = 5
+
+#    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin
+#        Description: Min Delay (in seconds) between each staggered
+#                     teleport operation within the same cycle.
+#        Default:     5
+PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin = 5
+
+#    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMax
+#        Description: Max Delay (in seconds) between each staggered
+#                     teleport operation within the same cycle.
+#        Default:     15
+PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin = 15
+
+#    PlayerbotGuildhouse.RequireRealPlayer
+#        Description: Whether a real player must be present in the guild
+#                     before teleporting bots to the guild house.
+#        Default:     true
+PlayerbotGuildhouse.RequireRealPlayer = true
+
+#    PlayerbotGuildhouse.EntryChancePercent
+#        Description: Percent chance that a picked bot will actually
+#                     teleport into the guild house.
 #        Default:     60
-PlayerbotGuildhouse.MoveBotsToGuildhouseCheckFrequency = 60
+PlayerbotGuildhouse.EntryChancePercent = 60
+
+#    PlayerbotGuildhouse.ExitChancePercent
+#        Description: Percent chance that a picked bot will actually
+#                     teleport out of the guild house.
+#        Default:     40
+PlayerbotGuildhouse.ExitChancePercent = 40
+
+#    PlayerbotGuildhouse.DebugEnabled
+#        Description: Enable detailed debug logging of teleport decisions
+#        Default:     false
+PlayerbotGuildhouse.DebugEnabled = false
