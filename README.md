@@ -1,80 +1,118 @@
+```
 # AzerothCore Module: PlayerBot Guild House Integration
 
-> **Disclaimer:** This module requires both the [Playerbots module](https://github.com/liyunfan1223/mod-playerbots) and the [Guild House module](https://github.com/azerothcore/mod-guildhouse). Please ensure that both modules are installed and running before using this module.
+> **Disclaimer:** This module requires both the [Playerbots module](https://github.com/liyunfan1223/mod-playerbots) and the [Guild House module](https://github.com/azerothcore/mod-guildhouse). Ensure both are installed and loaded before enabling this integration.
 
-Overview
---------
-The PlayerBot Guild House module for AzerothCore automatically teleports guild bots to the guild house (GM Island) when a real (human) player logs in, enters zone 876, or is detected during a periodic safety check. This gives the guildhouse a more lively atmosphere to emulate an active real guild.
+## Table of Contents
 
-Features
---------
-- **Automatic Teleportation:**  
-  When a real player logs in or enters zone 876 (GM Island), the module teleports all online, safe guild bots of the same guild to the designated guild house location.
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Installation](#installation)
+4. [Configuration](#configuration)
+5. [Debugging and Troubleshooting](#debugging-and-troubleshooting)
+6. [License](#license)
+7. [Contribution](#contribution)
 
-- **Periodic Safety Checks:**  
-  A configurable timer periodically scans for real players in zone 876 and teleports any safe guild bots that were missed initially due to being unsafe to teleport.
+## Overview
 
-- **Safety Verification:**  
-  Bots are only teleported if they meet safety criteria such as being alive, not in combat, and not engaged in battlegrounds, arenas, or other conflicting activities. Bots in groups with non-bot players are excluded to prevent disrupting ongoing group activities.
+This module runs a repeating world-script timer that periodically teleports guild bots into and out of their guild house (zone 876, GM Island). Each cycle consists of an **entry phase**—moving a random subset of safe bots into the house—and an **exit phase**—returning a random subset back to their saved locations (or hearthstone fallback). On server startup it also discovers any bots already in zone 876 and tracks them.
 
-- **Guild House Data Retrieval:**  
-  The module queries the guild house database (provided by the Guild House module) to fetch the appropriate teleportation coordinates, ensuring bots are moved to the correct location and phase.
+## Features
 
-Installation
-------------
+- **Periodic Teleport Cycle**  
+  A configurable timer triggers every **TeleportCycleFrequency** seconds to process all guild houses.
+
+- **Entry Phase**  
+  For each guild record in `guild_house`, if the real-player requirement is met, the script:
+    1. Gathers all online, safe bots (alive, out of combat, not in battlegrounds/arenas/LFG/flight, not already in zone 876, not grouped with real players).  
+    2. Picks up to **StaggeredTeleport.BatchSize** bots at random.  
+    3. Rolls for each bot against **EntryChancePercent**.  
+    4. Saves its current position, teleports it to the house location and phase, sends a system message, then staggers next teleport by **DelaySecondsMin–DelaySecondsMax** seconds.
+
+- **Exit Phase**  
+  For each guild’s bots currently tracked in the house:
+    1. Picks up to **StaggeredTeleport.BatchSize** bots at random.  
+    2. Rolls each against **ExitChancePercent**.  
+    3. If passed, restores the bot to its saved location (or casts hearthstone spell 8690 if lost), sends a system message, then staggers next teleport by **DelaySecondsMin–DelaySecondsMax** seconds.
+
+- **Real Player Requirement**  
+  If **RequireRealPlayer** is `true`, entry phase only runs for guilds with at least one real human online.
+
+- **Position Persistence**  
+  Original bot positions are stored in memory each cycle and used for exit teleportation.
+
+- **Server Restart Sync**  
+  On startup the script detects any bots already in zone 876 and includes them in the exit tracking list.
+
+- **Debug Logging**  
+  When **DebugEnabled** is `true`, detailed INFO logs are emitted at each step.
+
+## Installation
+
 1. **Clone the Module**  
-   Ensure that the AzerothCore Playerbots fork and the Guild House module are installed and running. Clone the module into your AzerothCore modules directory:
-   
-       cd /path/to/azerothcore/modules
-       git clone https://github.com/DustinHendrickson/mod-player-bot-guildhouse.git
+    cd /path/to/azerothcore/modules  
+    git clone https://github.com/DustinHendrickson/mod-player-bot-guildhouse.git
 
 2. **Recompile AzerothCore**  
-   Rebuild the project with the new module:
-   
-       cd /path/to/azerothcore
-       mkdir build && cd build
-       cmake ..
-       make -j$(nproc)
+    cd /path/to/azerothcore  
+    mkdir build && cd build  
+    cmake ..  
+    make -j$(nproc)
 
-3. **Configure the Module**  
-   Rename the configuration file:
-   
-       mv /path/to/azerothcore/modules/mod_player_bot_guildhouse.conf.dist /path/to/azerothcore/modules/mod_player_bot_guildhouse.conf
+3. **Enable and Configure**  
+    mv /path/to/azerothcore/modules/mod_player_bot_guildhouse.conf.dist /path/to/azerothcore/modules/mod_player_bot_guildhouse.conf
 
 4. **Restart the Server**  
-   Launch the world server:
-   
-       ./worldserver
+    ./worldserver
 
-Configuration Options
----------------------
-Edit your `mod_player_bot_guildhouse.conf` file to customize the module behavior. Below is the configuration for the PlayerBot Guild House module:
+## Configuration
 
-    [worldserver]
-    
-    ##############################################
-    # mod-player-bot-guildhouse configuration
-    ##############################################
-    #
-    #    PlayerbotGuildhouse.MoveBotsToGuildhouseCheckFrequency
-    #        Description: The frequency (in seconds) at which the check to move safe guildbots is performed.
-    #        Default:     60
-    PlayerbotGuildhouse.MoveBotsToGuildhouseCheckFrequency = 60
+Edit `mod_player_bot_guildhouse.conf`:
 
-Debugging and Troubleshooting
------------------------------
-- **Module Not Triggering Teleports:**  
-  Ensure that real players are present in zone 876 (GM Island) and that both the Playerbots and Guild House modules are correctly installed and configured.
+    # Interval between teleport cycles in seconds.
+    PlayerbotGuildhouse.TeleportCycleFrequency      = 120
 
-- **Safety Checks Preventing Teleportation:**  
-  Bots engaged in combat, flight, battlegrounds, or grouped with non-bot players will not be teleported. Verify bot statuses if unexpected behavior occurs.
+    # Maximum bots to teleport per phase.
+    PlayerbotGuildhouse.StaggeredTeleport.BatchSize = 5
 
-License
--------
-This module is released under the GNU GPL v2 license, in accordance with AzerothCore's licensing model.
+    # Delay range (seconds) between staggered teleports.
+    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin = 5
+    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMax = 15
 
-Contribution
-------------
-Created by Dustin Hendrickson.
+    # Require at least one real player in guild before entry phase.
+    PlayerbotGuildhouse.RequireRealPlayer         = true
 
-Pull requests and issues are welcome. Please ensure that contributions adhere to AzerothCore's coding standards.
+    # Percent chance for a candidate bot to enter the guild house.
+    PlayerbotGuildhouse.EntryChancePercent        = 60
+
+    # Percent chance for a tracked bot to exit the guild house.
+    PlayerbotGuildhouse.ExitChancePercent         = 40
+
+    # Enable detailed debug logging.
+    PlayerbotGuildhouse.DebugEnabled              = false
+
+## Debugging and Troubleshooting
+
+- **No Bots Moving**  
+    - Confirm the cycle frequency is reached (`TeleportCycleFrequency`).  
+    - If `RequireRealPlayer` is `true`, verify at least one human is online in the guild.
+
+- **Bots Skipped by Safety Checks**  
+    - Ensure bots are alive, out of combat, not in battlegrounds/arenas/LFG queues, not flying, and not in zone 876.  
+    - Check that bots are not grouped with any real players.
+
+- **Unexpected Exit Behavior**  
+    - Verify that saved positions exist for each bot.  
+    - If missing, bots use the hearthstone fallback spell 8690.
+
+- **Enable Debug Logs**  
+    - Set `DebugEnabled = true` to view detailed INFO messages in your server console.
+
+## License
+
+This module is released under the GNU GPL v2 license, matching AzerothCore’s licensing.
+
+## Contribution
+
+Created and maintained by Dustin Hendrickson. Pull requests and issues are welcome. Please adhere to AzerothCore coding standards.
+```
