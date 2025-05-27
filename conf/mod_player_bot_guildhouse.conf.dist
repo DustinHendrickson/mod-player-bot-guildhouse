@@ -16,18 +16,6 @@ PlayerbotGuildhouse.TeleportCycleFrequency = 120
 #        Default:     5
 PlayerbotGuildhouse.StaggeredTeleport.BatchSize = 5
 
-#    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin
-#        Description: Min Delay (in seconds) between each staggered
-#                     teleport operation within the same cycle.
-#        Default:     5
-PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin = 5
-
-#    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMax
-#        Description: Max Delay (in seconds) between each staggered
-#                     teleport operation within the same cycle.
-#        Default:     15
-PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin = 15
-
 #    PlayerbotGuildhouse.RequireRealPlayer
 #        Description: Whether a real player must be present in the guild
 #                     before teleporting bots to the guild house.

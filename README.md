@@ -32,7 +32,7 @@ This module runs a repeating world-script timer that periodically teleports guil
   For each guild’s bots currently tracked in the house:
     1. Picks up to **StaggeredTeleport.BatchSize** bots at random.  
     2. Rolls each against **ExitChancePercent**.  
-    3. If passed, restores the bot to its saved location (or casts hearthstone spell 8690 if lost), sends a system message, then staggers next teleport by **DelaySecondsMin–DelaySecondsMax** seconds.
+    3. If passed, restores the bot to its saved location (or casts hearthstone spell 8690 if lost) and sends a system message.
 
 - **Real Player Requirement**  
   If **RequireRealPlayer** is `true`, entry phase only runs for guilds with at least one real human online.
@@ -73,10 +73,6 @@ Edit `mod_player_bot_guildhouse.conf`:
 
     # Maximum bots to teleport per phase.
     PlayerbotGuildhouse.StaggeredTeleport.BatchSize = 5
-
-    # Delay range (seconds) between staggered teleports.
-    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin = 5
-    PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMax = 15
 
     # Require at least one real player in guild before entry phase.
     PlayerbotGuildhouse.RequireRealPlayer         = true
