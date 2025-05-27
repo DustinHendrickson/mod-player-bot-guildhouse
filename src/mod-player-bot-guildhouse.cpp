@@ -39,9 +39,6 @@
 static uint32 g_TeleportCycleFrequency    = 120;
 // Maximum bots to teleport per wave
 static uint32 g_TeleportBatchSize         = 5;
-// Delay range between staggered teleports within a cycle (seconds)
-static uint32 g_TeleportDelaySecondsMin   = 5;
-static uint32 g_TeleportDelaySecondsMax   = 15;
 // If true require at least one real player in guild before teleport
 static bool   g_RequireRealPlayer         = true;
 // Percent chance to teleport a picked bot into guildhouse (default 60%)
@@ -96,8 +93,6 @@ public:
     {
         g_TeleportCycleFrequency    = sConfigMgr->GetOption<uint32>("PlayerbotGuildhouse.TeleportCycleFrequency", g_TeleportCycleFrequency);
         g_TeleportBatchSize         = sConfigMgr->GetOption<uint32>("PlayerbotGuildhouse.StaggeredTeleport.BatchSize", g_TeleportBatchSize);
-        g_TeleportDelaySecondsMin   = sConfigMgr->GetOption<uint32>("PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMin", g_TeleportDelaySecondsMin);
-        g_TeleportDelaySecondsMax   = sConfigMgr->GetOption<uint32>("PlayerbotGuildhouse.StaggeredTeleport.DelaySecondsMax", g_TeleportDelaySecondsMax);
         g_RequireRealPlayer         = sConfigMgr->GetOption<bool>  ("PlayerbotGuildhouse.RequireRealPlayer", g_RequireRealPlayer);
         g_EntryChancePercent        = sConfigMgr->GetOption<uint32>("PlayerbotGuildhouse.EntryChancePercent", g_EntryChancePercent);
         g_ExitChancePercent         = sConfigMgr->GetOption<uint32>("PlayerbotGuildhouse.ExitChancePercent", g_ExitChancePercent);
@@ -211,8 +206,6 @@ public:
                     ChatHandler(bot->GetSession()).PSendSysMessage("PlayerBot: Teleported to Guild House.");
                     if (g_DebugEnabled)
                         LOG_INFO("server.loading","[BotGuildHouse] Teleported in {}", bot->GetName().c_str());
-                    std::this_thread::sleep_for(std::chrono::seconds(
-                        urand(g_TeleportDelaySecondsMin, g_TeleportDelaySecondsMax)));
                     g_GuildhouseBots[guildId].push_back(guid);
                 }
             }
@@ -251,8 +244,6 @@ public:
                             ChatHandler(bot->GetSession()).PSendSysMessage("PlayerBot: Left Guild House.");
                             if (g_DebugEnabled)
                                 LOG_INFO("server.loading","[BotGuildHouse] Teleported out {}", bot->GetName().c_str());
-                            std::this_thread::sleep_for(std::chrono::seconds(
-                                urand(g_TeleportDelaySecondsMin, g_TeleportDelaySecondsMax)));
                             g_PreviousLocations.erase(it);
                         }
                         else
