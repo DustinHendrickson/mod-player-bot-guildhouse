@@ -56,7 +56,7 @@ static std::unordered_map<uint32, std::vector<ObjectGuid>>                      
 static bool IsPlayerBot(Player* player)
 {
     if (!player) return false;
-    PlayerbotAI* ai = sPlayerbotsMgr->GetPlayerbotAI(player);
+    PlayerbotAI* ai = PlayerbotsMgr::instance().GetPlayerbotAI(player);
     return ai && ai->IsBotAI();
 }
 
